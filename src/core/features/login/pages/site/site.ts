@@ -105,7 +105,10 @@ export default class CoreLoginSitePage implements OnInit {
 
         // Load fixed sites if they're set.
         const sites = await CoreLoginHelper.getAvailableSites();
-
+        if (sites.length == 1) {
+            url = await this.initSiteSelector();
+            this.connect(url);
+        }
         if (sites.length) {
             url = await this.initSiteSelector();
         } else {

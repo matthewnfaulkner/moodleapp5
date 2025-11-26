@@ -54,7 +54,7 @@ const routes: Routes = [
     ],
     providers: [
         provideAppInitializer(() => {
-            CoreMainMenuDelegate.registerHandler(CoreTagMainMenuHandler.instance);
+            // CoreMainMenuDelegate.registerHandler(CoreTagMainMenuHandler.instance);
             CoreContentLinksDelegate.registerHandler(CoreTagIndexLinkHandler.instance);
             CoreContentLinksDelegate.registerHandler(CoreTagSearchLinkHandler.instance);
         }),

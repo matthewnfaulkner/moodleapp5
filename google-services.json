@@ -1,30 +1,21 @@
 {
   "project_info": {
-    "project_number": "",
-    "firebase_url": "",
-    "project_id": "",
-    "storage_bucket": ""
+    "project_number": "864094398608",
+    "project_id": "apoa-airnotifier",
+    "storage_bucket": "apoa-airnotifier.appspot.com"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:111111111111:android:1111111111111111",
+        "mobilesdk_app_id": "1:864094398608:android:6198f78d7d7a930eeb9015",
         "android_client_info": {
-          "package_name": "com.moodle.moodlemobile"
+          "package_name": "com.apoaonline.apoamobile"
         }
       },
-      "oauth_client": [
-        {
-          "client_id": "",
-          "client_type": 3
-        }
-      ],
+      "oauth_client": [],
       "api_key": [
         {
-          "current_key": ""
-        },
-        {
-          "current_key": ""
+          "current_key": "AIzaSyDnypPj5xZaIyinAhNeBVdN8REZ87cAuII"
         }
       ],
       "services": {

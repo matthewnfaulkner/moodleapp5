@@ -31,6 +31,7 @@ import { CoreUrl } from '@singletons/url';
 import { CoreLoadings } from './overlays/loadings';
 import { CoreAlerts } from './overlays/alerts';
 import { CorePlatform } from './platform';
+import { CoreStatusWithWarningsWSResponse, CoreWS, CoreWSAjaxPreSets } from '@services/ws';
 
 /*
  * Provider to handle custom URL schemes.
@@ -140,6 +141,9 @@ export class CoreCustomURLSchemesProvider {
         try {
             if (this.isCustomURLToken(url)) {
                 data = await this.getCustomURLTokenData(url);
+            }
+            else if (this.isCustomURLQrLogin(url)) {
+                data = await this.getCustomURLQrLoginData(url);
             } else if (this.isCustomURLLink(url)) {
                 // In iOS, the protocol after the scheme doesn't have ":". Add it.
                 url = url.replace(/\/\/link=(https?)\/\//, '//link=$1://');
@@ -293,6 +297,20 @@ export class CoreCustomURLSchemesProvider {
             }
         }
 
+        if (params.qrlogin !== null && params.userid !== null) {
+            if(params.token === undefined && params.privateToken === undefined) {
+                try {
+                    const data = await this.getTokensFromQrLogin(params.userid, params.qrlogin, url);
+
+                    params.token = data.token;
+                    params.privateToken = data.privatetoken;
+                }
+                catch (error){
+                    this.logger.error(error);
+                }
+            }
+        }
+
         return {
             siteUrl: url,
             username: username,
@@ -415,6 +433,112 @@ export class CoreCustomURLSchemesProvider {
         return data;
     }
 
+        /**
+         * Get the data from a "token" custom URL scheme. This kind of URL is deprecated.
+         *
+         * @param url URL to treat.
+         * @returns Promise resolved with the data.
+         */
+    protected async getCustomURLQrLoginData(url: string): Promise<CoreCustomURLSchemesParams> {
+        if (!this.isCustomURLToken(url)) {
+            throw this.createInvalidSchemeError(url);
+        }
+
+        if (CoreSSO.isSSOAuthenticationOngoing()) {
+            // Authentication ongoing, probably duplicated request.
+            throw new CoreCustomURLSchemesHandleError('Duplicated');
+        }
+
+        // App opened using custom URL scheme. Probably an SSO authentication.
+        CoreSSO.startSSOAuthentication();
+        this.logger.debug('App launched by URL with an SSO');
+
+        // Delete the sso scheme from the URL.
+        const originalUrl = url;
+        url = this.removeCustomURLTokenScheme(url);
+
+        // Some platforms like Windows add a slash at the end. Remove it.
+        // Some sites add a # at the end of the URL. If it's there, remove it.
+        url = url.replace(/\/?#?\/?$/, '');
+
+        // Decode from base64.
+        try {
+            url = atob(url);
+        } catch (err) {
+            // Error decoding the parameter.
+            this.logger.error('Error decoding parameter received for login SSO');
+
+            throw new CoreCustomURLSchemesHandleError(new CoreError(Translate.instant('core.login.invalidsite'), { debug: {
+                code: 'errordecodingparameter',
+                details: `Error when trying to decode base 64 string.<br><br>URL: ${originalUrl}<br><br>Text to decode: ${url}` +
+                    `<br><br>Error: ${CoreErrorHelper.getErrorMessageFromError(err)}`,
+            } }));
+        }
+
+        // Get the params of the URL.
+        const params = CoreUrl.extractUrlParams(url);
+
+        // Remove the params to get the site URL.
+        if (url.indexOf('?') != -1) {
+            url = url.substring(0, url.indexOf('?'));
+        }
+
+        try {
+            const qrtokens = await this.getTokensFromQrLogin(params.userid, params.qrlogin, url);
+
+            return {
+                siteUrl: url,
+                token: qrtokens.token,
+                privateToken: params.privateToken,
+                redirect: params.redirect,
+                isAuthenticationURL: !!qrtokens.token,
+            };
+
+        }
+        catch(error){
+            CoreAlerts.showError(error);
+
+            throw new CoreCustomURLSchemesHandleError(new CoreError(Translate.instant('core.login.invalidsite'), { debug: {
+                code: 'errordecodingparameter',
+                details: `Error when trying to decode base 64 string.<br><br>URL: ${originalUrl}<br><br>Text to decode: ${url}` +
+                    `<br><br>Error: ${CoreErrorHelper.getErrorMessageFromError(error)}`,
+            } }));
+        }
+
+    }
+
+    /**
+     * Get dashboard blocks.
+     *
+     * @param userid User ID. Default, current user.
+     * @param qrlogin Site ID. If not defined, current site.
+     * @returns Promise resolved with the list of blocks.
+     */
+    async getTokensFromQrLogin(
+        userid?: string,
+        qrlogin?: string,
+        url: string = '',
+    ): Promise<CoreCustomURLSchemesQrTokens> {
+        const preSets: CoreWSAjaxPreSets = {
+            siteUrl: url,
+        };
+        try {
+            const observable = await CoreWS.callAjax<CoreCustomURLSchemesQrWSResponse>(
+                'tool_mobile_get_tokens_for_qr_login',
+                {
+                    userid: userid,
+                    qrloginkey: qrlogin,
+                },
+                preSets,
+            );
+
+                    return observable;
+        }catch (error) {
+            throw new CoreError(error);
+        }
+
+    }
+
     /**
      * Go to page to add a site, or open a browser if SSO.
      *
@@ -485,6 +609,20 @@ export class CoreCustomURLSchemesProvider {
         }
 
         return url.indexOf(`${CoreConstants.CONFIG.customurlscheme}://token=`) != -1;
+    }
+
+    /**
+     * Check whether a URL is a custom URL scheme with a "token" param (deprecated).
+     *
+     * @param url URL to check.
+     * @returns Whether it's a custom URL scheme.
+     */
+    isCustomURLQrLogin(url: string): boolean {
+        if (!url) {
+            return false;
+        }
+
+        return url.indexOf(`${CoreConstants.CONFIG.customurlscheme}://qrlogin=`) != -1;
     }
 
     /**
@@ -586,6 +724,12 @@ export class CoreCustomURLSchemesHandleError extends CoreError {
 
 }
 
+export interface CoreCustomURLSchemesQrLoginResponse {
+
+    qrlogin?: string;
+    userid?: number;
+}
+
 export const CoreCustomURLSchemes = makeSingleton(CoreCustomURLSchemesProvider);
 
 /**
@@ -613,3 +757,26 @@ export interface CoreCustomURLSchemesParams extends CoreLoginSSOData {
      */
     isAuthenticationURL?: boolean;
 }
+
+export type CoreCustomURLSchemesQrTokens = {
+    token: string;
+    privatetoken: string;
+    warnings?: CoreStatusWithWarningsWSResponse[];
+};
+
+/**
+ * Data returned by core_block_get_dashboard_blocks WS.
+ */
+type CoreCustomURLSchemesQrWSResponse = {
+    token: string;
+    privatetoken: string;
+    warnings?: CoreStatusWithWarningsWSResponse[];
+};
+
+/**
+ * Options for some get dashboard blocks calls.
+ */
+export type CoreCustomURLSchemesQrParams =  {
+    userid?: string; // User ID. If not defined, current user.
+    qrlogin?: string; // Page to get. If not defined, CoreCoursesDashboardProvider.MY_PAGE_DEFAULT.
+};

@@ -43,6 +43,7 @@ import { AddonBlockTagsModule } from './tags/tags.module';
 import { AddonBlockTimelineModule } from './timeline/timeline.module';
 import { AddonBlockGlobalSearchModule } from '@addons/block/globalsearch/globalsearch.module';
 import { AddonBlockSearchForumsModule } from '@addons/block/searchforums/searchforums.module';
+import { AddonBlockFrontpageModule } from '@addons/block/frontpage/frontpage.module';
 
 @NgModule({
     imports: [
@@ -57,6 +58,7 @@ import { AddonBlockSearchForumsModule } from '@addons/block/searchforums/searchf
         AddonBlockCommentsModule,
         AddonBlockCompletionStatusModule,
         AddonBlockCourseListModule,
+        AddonBlockFrontpageModule,
         AddonBlockGlobalSearchModule,
         AddonBlockGlossaryRandomModule,
         AddonBlockHtmlModule,

@@ -124,7 +124,7 @@ const routes: Routes = [
     providers: [
         provideAppInitializer(() => {
             CoreMainMenuHomeDelegate.registerHandler(CoreDashboardHomeHandler.instance);
-            CoreMainMenuDelegate.registerHandler(CoreCoursesMyCoursesHomeHandler.instance);
+            // CoreMainMenuDelegate.registerHandler(CoreCoursesMyCoursesHomeHandler.instance);
             CoreContentLinksDelegate.registerHandler(CoreCoursesCourseLinkHandler.instance);
             CoreContentLinksDelegate.registerHandler(CoreCoursesIndexLinkHandler.instance);
             CoreContentLinksDelegate.registerHandler(CoreCoursesMyCoursesLinkHandler.instance);

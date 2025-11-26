@@ -725,7 +725,7 @@ export class CoreLocalNotificationsProvider {
 
         if (CorePlatform.isAndroid()) {
             notification.icon = notification.icon || 'res://icon';
-            notification.smallIcon = notification.smallIcon || 'res://smallicon';
+            notification.smallIcon = notification.smallIcon || 'res://ic_stat_notification';
             notification.color = notification.color || CoreConstants.CONFIG.notificoncolor;
 
             if (notification.led !== false) {

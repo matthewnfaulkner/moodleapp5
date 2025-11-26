@@ -1,6 +1,6 @@
 {
-    "app_id": "com.moodle.moodlemobile",
-    "appname": "Moodle Mobile",
+    "app_id": "com.apoaonline.apoamobile",
+    "appname": "APOA Mobile",
     "versioncode": 51000,
     "versionname": "5.1.0",
     "cache_update_frequency_usually": 420000,
@@ -86,23 +86,29 @@
         "medium": 110,
         "high": 120
     },
-    "customurlscheme": "moodlemobile",
-    "sites": [],
-    "multisitesdisplay": "",
+    "customurlscheme": "apoamobile",
+    "sites": [{
+        "name": "APOA",
+        "staging": false,
+        "url": "https://apoaonline.com",
+        "location": "malaysia",
+        "title": "APOA"
+    }],
+    "multisitesdisplay": false,
     "sitefindersettings": {},
-    "onlyallowlistedsites": false,
+    "onlyallowlistedsites": true,
     "forcedefaultlanguage": false,
     "privacypolicy": "https://moodle.net/moodle-app-privacy/",
     "notificoncolor": "#f98012",
     "enableanalytics": false,
-    "enableonboarding": true,
+    "enableonboarding": false,
     "forceColorScheme": "",
     "forceLoginLogo": false,
     "showTopLogo": "hidden",
     "ioswebviewscheme": "moodleappfs",
     "appstores": {
-        "android": "com.moodle.moodlemobile",
-        "ios": "id633359593"
+        "android": "com.apoaonline.apoamobile",
+        "ios": "id6480398669"
     },
     "wsrequestqueuelimit": 10,
     "wsrequestqueuedelay": 100,

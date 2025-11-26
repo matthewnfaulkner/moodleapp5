@@ -12,11 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Component, OnDestroy, OnInit, inject } from '@angular/core';
+import { Component, OnDestroy, OnInit, inject, ViewChildren, QueryList  } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 
 import { CoreSite, CoreSiteConfig } from '@classes/sites/site';
-import { CoreCourse, CoreCourseWSSection, sectionContentIsModule } from '@features/course/services/course';
+import { CoreCourse, CoreCourseWSSection, sectionContentIsModule, CoreCourseBlock  } from '@features/course/services/course';
 import { CoreSites } from '@services/sites';
 import { CoreSiteHome } from '@features/sitehome/services/sitehome';
 import { CoreCourses } from '@features//courses/services/courses';
@@ -36,6 +36,10 @@ import { Translate } from '@singletons';
 import { CoreSharedModule } from '@/core/shared.module';
 import { CoreCourseModuleComponent } from '../../../course/components/module/module';
 import { CoreBlockSideBlocksButtonComponent } from '../../../block/components/side-blocks-button/side-blocks-button';
+import { CoreSiteHomeJumboConfig } from '../../services/sitehome';
+import { CoreBlockComponent } from '@features/block/components/block/block';
+import { CoreLoadings } from '@services/overlays/loadings';
+import { CoreBlockDelegate } from '@features/block/services/block-delegate';
 
 /**
  * Page that displays site home index.
@@ -48,9 +52,12 @@ import { CoreBlockSideBlocksButtonComponent } from '../../../block/components/si
         CoreSharedModule,
         CoreCourseModuleComponent,
         CoreBlockSideBlocksButtonComponent,
+        CoreBlockComponent,
     ],
 })
 export default class CoreSiteHomeIndexPage implements OnInit, OnDestroy {
+
+    @ViewChildren(CoreBlockComponent) blocksComponents?: QueryList<CoreBlockComponent>;
 
     dataLoaded = false;
     section?: CoreCourseWSSection & {
@@ -59,11 +66,18 @@ export default class CoreSiteHomeIndexPage implements OnInit, OnDestroy {
 
     hasContent = false;
     hasBlocks = false;
+    hasMainBlocks = false;
+    hasSideBlocks = false;
     items: string[] = [];
     siteHomeId = 1;
     currentSite!: CoreSite;
     searchEnabled = false;
     newsForumModule?: CoreCourseModuleData;
+    blocks: Partial<CoreCourseBlock>[] = [];
+    loaded = false;
+    userId?: number;
+    jumboConfig!: CoreSiteHomeJumboConfig;
+
     isModule = sectionContentIsModule;
 
     protected updateSiteObserver: CoreEventObserver;
@@ -123,6 +137,15 @@ export default class CoreSiteHomeIndexPage implements OnInit, OnDestroy {
 
         const config = this.currentSite.getStoredConfig() || { numsections: 1, frontpageloggedin: undefined };
 
+        try{
+            this.jumboConfig =  await CoreSiteHome.getSiteHomeJumboConfig();
+        }
+        catch (error) {
+            CoreAlerts.showError(error);
+
+            // Cannot get the blocks, just show dashboard if needed.
+        }
+
         this.items = await CoreSiteHome.getFrontPageItems(config.frontpageloggedin);
         this.hasContent = this.items.length > 0;
 
@@ -171,6 +194,49 @@ export default class CoreSiteHomeIndexPage implements OnInit, OnDestroy {
         }
 
         this.hasBlocks = await CoreBlockHelper.hasCourseBlocks(this.siteHomeId);
+
+        if (this.hasBlocks) {
+            this.userId = CoreSites.getCurrentSiteUserId();
+
+            try {
+                const blocks = await CoreSiteHome.getSiteHomeBlocks();
+
+                this.blocks = blocks.mainBlocks;
+
+                this.hasMainBlocks = CoreBlockDelegate.hasSupportedBlock(blocks.mainBlocks);
+                this.hasSideBlocks = CoreBlockDelegate.hasSupportedBlock(blocks.sideBlocks);
+            } catch (error) {
+                CoreAlerts.showError(error);
+
+                // Cannot get the blocks, just show dashboard if needed.
+                this.loadFallbackBlocks();
+            }
+        }else {
+            // Disabled.
+            this.blocks = [];
+        }
+
+        this.loaded = true;
+
+        this.logView();
+    }
+
+    /**
+     * Load fallback blocks to shown before 3.6 when dashboard blocks are not supported.
+     */
+    protected loadFallbackBlocks(): void {
+        this.blocks = [
+            {
+                name: 'myoverview',
+                visible: true,
+            },
+            {
+                name: 'timeline',
+                visible: true,
+            },
+        ];
+
+        this.hasMainBlocks = CoreBlockDelegate.isBlockSupported('myoverview') || CoreBlockDelegate.isBlockSupported('timeline');
     }
 
     /**
@@ -199,6 +265,13 @@ export default class CoreSiteHomeIndexPage implements OnInit, OnDestroy {
                 this.siteHomeId,
             ));
         }
+
+                // Invalidate the blocks.
+        this.blocksComponents?.forEach((blockComponent) => {
+            promises.push(blockComponent.invalidate().catch(() => {
+                // Ignore errors.
+            }));
+        });
 
         Promise.all(promises).finally(async () => {
             await this.loadContent().finally(() => {
@@ -240,6 +313,21 @@ export default class CoreSiteHomeIndexPage implements OnInit, OnDestroy {
      */
     ngOnDestroy(): void {
         this.updateSiteObserver.off();
+    }
+
+        /**
+         * Opens a file.
+         */
+    async open(url: string): Promise<void> {
+        const modal = await CoreLoadings.show();
+        CoreSites.getCurrentSiteId();
+        try {
+            const site = CoreSites.getCurrentSite();
+
+            await site?.openInBrowserWithAutoLogin(url);
+        } finally {
+            modal.dismiss();
+        }
     }
 
     /**

@@ -1,11 +1,14 @@
 @import "./globals";
 
+
+
 :root.force-safe-area-margins {
     --ion-safe-area-left: 40px;
     --ion-safe-area-right: 40px;
     --ion-safe-area-top: 40px;
     --ion-safe-area-bottom: 40px;
 }
+
 
 :root {
     --zoom-ratio: 1;
@@ -15,6 +18,8 @@
     &.ios {
         font-size: calc(100% * var(--zoom-ratio));
     }
+
+
 
     // Apply zoom ratio to safe area and keyboard height CSS variable.
     // Also, store safe area variables as --root-safe-area-*.

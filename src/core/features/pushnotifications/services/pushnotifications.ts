@@ -289,8 +289,9 @@ export class CorePushNotificationsProvider {
 
         return {
             android: {
+                senderID: '864094398608',
                 sound: !!soundEnabled,
-                icon: 'smallicon',
+                icon: 'ic_stat_notification',
                 iconColor: CoreConstants.CONFIG.notificoncolor,
             },
             ios: {
@@ -327,7 +328,7 @@ export class CorePushNotificationsProvider {
             appid:      CoreConstants.CONFIG.app_id,
             name:       Device.manufacturer || '',
             model:      Device.model,
-            platform:   `${Device.platform}-fcm`,
+            platform:   Device.platform,
             version:    Device.version,
             pushid:     this.pushID,
             uuid:       Device.uuid,

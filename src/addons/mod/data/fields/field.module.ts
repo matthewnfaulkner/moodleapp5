@@ -25,6 +25,7 @@ import { AddonModDataFieldRadiobuttonModule } from './radiobutton/radiobutton.mo
 import { AddonModDataFieldTextModule } from './text/text.module';
 import { AddonModDataFieldTextareaModule } from './textarea/textarea.module';
 import { AddonModDataFieldUrlModule } from './url/url.module';
+import { AddonModDataFieldConsentModule } from './consent/consent.module';
 
 @NgModule({
     imports: [
@@ -40,6 +41,7 @@ import { AddonModDataFieldUrlModule } from './url/url.module';
         AddonModDataFieldTextModule,
         AddonModDataFieldTextareaModule,
         AddonModDataFieldUrlModule,
+        AddonModDataFieldConsentModule,
     ],
 })
 export class AddonModDataFieldModule {}

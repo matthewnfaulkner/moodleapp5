@@ -43,7 +43,7 @@ const appRoutes: Routes = [
             {
                 path: '',
                 pathMatch: 'full',
-                redirectTo: 'sites',
+                redirectTo: 'site',
             },
             {
                 path: 'site',
@@ -55,7 +55,7 @@ const appRoutes: Routes = [
             },
             {
                 path: 'sites',
-                loadComponent: () => import('@features/login/pages/sites/sites'),
+                loadComponent: () => import('@features/login/pages/site/site'),
                 canActivate: [hasSitesGuard],
             },
             {
