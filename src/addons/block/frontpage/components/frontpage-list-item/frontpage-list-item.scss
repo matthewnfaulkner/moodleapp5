@@ -1,0 +1,150 @@
+@use "theme/globals" as *;
+
+:host {
+    @for $i from 0 to length($core-course-image-background) {
+        &.course-color-#{$i} {
+            --course-color: var(--core-course-color-#{$i});
+            --course-color-tint: var(--core-course-color-#{$i}-tint);
+        }
+    }
+
+    --avatar-radius: var(--core-courseimage-radius);
+    --avatar-size: 60px;
+    --avatar-margin: 16px;
+
+    --card-vertical-margin: 8px;
+    --card-radius: 12px;
+
+    --shortname-size: 12px;
+
+    --button-size: 44px;
+    --button-padding: 10px;
+    --button-radius: 50%;
+    --button-background: rgba(255,255,255,0.5);
+
+    @include media-breakpoint-down(md) {
+        --avatar-size: 48px;
+        --avatar-margin: 12px;
+    }
+}
+
+
+:host-context(html.dark) {
+    --button-background: rgba(0, 0, 0, 0.3);
+}
+
+// Common styles.
+.item-heading ion-icon {
+    @include margin-horizontal(null, 4px);
+    color: var(--core-star-color);
+}
+
+button {
+    z-index: 1;
+}
+
+ion-card {
+    --border-radius: var(--card-radius);
+}
+
+.core-button-spinner {
+    margin: 0;
+    position: absolute;
+    @include position(8px, 8px, null, null);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    z-index: 2;
+
+    ion-spinner {
+        margin-top: 4px;
+    }
+
+    ::ng-deep ion-button {
+        --border-radius: var(--button-radius);
+        --background: var(--button-background);
+        --padding-top: var(--button-padding);
+        --padding-end: var(--button-padding);
+        --padding-bottom: var(--button-padding);
+        --padding-start: var(--button-padding);
+        width: var(--button-size);
+        height: var(--button-size);
+        margin: 0;
+        &::part(native) {
+            background: var(--background);
+        }
+    }
+
+    core-download-refresh ::ng-deep .core-icon-downloaded {
+        display: none;
+    }
+}
+
+.core-course-enrol-icons, .core-icon-downloaded {
+    @include margin-horizontal(4px, 0px);
+}
+
+.core-course-shortname {
+    font-size: var(--shortname-size);
+    color: var(--dark);
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+}
+
+ion-chip {
+    margin-top: 8px;
+    margin-left: 0;
+    margin-right: 0;
+    max-width: 100%;
+
+    &.core-course-category {
+        @include margin-horizontal(0px, 8px);
+    }
+}
+
+ion-card.addon-block-frontpage{
+    border-color: black!important;
+    border-width: 10px;
+}
+// List layout.
+ion-item.core-course-list-item {
+    max-width: var(--list-item-max-width);
+
+    border-color: $primary;
+    background-color: $primary!important;
+
+    ion-icon.course-icon {
+        padding: 12px;
+        font-size: calc(var(--avatar-size) - 24px);
+        border-radius: var(--avatar-radius);
+        color: var(--course-color-tint);
+        background: var(--course-color, transparent);
+    }
+
+    ion-avatar {
+       --border-radius: var(--avatar-radius);
+        width: var(--avatar-size);
+        height: var(--avatar-size);
+        img {
+            background: transparent;
+        }
+    }
+
+    ion-item::part(native) {
+        --padding-start: var(--avatar-margin);
+    }
+
+    .core-course-thumb {
+        @include margin(var(--avatar-margin), var(--avatar-margin), var(--avatar-margin), null);
+    }
+
+    .core-course-maininfo {
+        @include margin-horizontal(null, 32px);
+    }
+}
+
+// Fill geopaterns
+.core-course-thumb img[src$=".svg"] {
+    min-width: 100%;
+}

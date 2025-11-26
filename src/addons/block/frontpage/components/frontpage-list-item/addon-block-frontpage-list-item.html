@@ -1,0 +1,15 @@
+<ion-item class="ion-text-wrap" [class.core-course-list-item]="true" (click)="openCourse()" button [attr.aria-label]="course.itemtitle ">
+    <ion-label>
+        <ion-text color="primary">
+            <h2>
+                <core-format-text [text]="course.itemtitle" contextLevel="coursecat" [contextInstanceId]="course.itemid" />
+            </h2>
+            <p>
+                <small>
+                    <core-format-text [text]="course.itemdescription" contextLevel="coursecat" [contextInstanceId]="course.itemid" />
+                </small>
+            </p>
+
+        </ion-text>
+    </ion-label>
+</ion-item>

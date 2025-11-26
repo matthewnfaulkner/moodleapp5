@@ -1,0 +1,27 @@
+@use "theme/globals" as *;
+
+:host {
+    .core-block-content ::ng-deep {
+        ul.list {
+            list-style: none;
+            margin-left: 0;
+            margin-right: 0;
+            -webkit-padding-start: 0;
+
+            li {
+                padding-bottom: 8px;
+            }
+        }
+    }
+    .core-block-footer ::ng-deep {
+        display: none;
+    }
+}
+
+ion-item-divider{
+    background-color: var(--ion-color-primary);
+
+    ion-label{
+        color: var(--ion-color-secondary);
+    }
+}

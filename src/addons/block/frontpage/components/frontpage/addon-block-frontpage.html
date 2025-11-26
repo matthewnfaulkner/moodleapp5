@@ -1,0 +1,26 @@
+<core-loading [hideUntil]="loaded" [fullscreen]="false">
+    <ion-item-divider class="ion-text-wrap" *ngIf="parsedBlockContent?.sectiontitle" sticky="true">
+        <ion-label>
+            <h1>
+                <core-format-text [text]="parsedBlockContent.sectiontitle | translate" contextLevel="block"
+                    [contextInstanceId]="block.instanceid" [courseId]="courseId" />
+            </h1>
+            <small class="text-muted">
+                <core-format-text *ngIf="parsedBlockContent.sectionmore" [text]="parsedBlockContent.sectionmore | translate"
+                    contextLevel="block" [contextInstanceId]="block.instanceid" [courseId]="courseId" />
+            </small>
+        </ion-label>
+    </ion-item-divider>
+    <div class="safe-area-padding" *ngIf="parsedBlockContent.blockitems">
+        <ion-list *ngFor="let blockItem of parsedBlockContent.blockitems" class="ion-no-padding" lines="inset">
+            <addon-block-frontpage-list-item [blockItem]="blockItem" [blockContentLog]="blockContentLog" class="core-courseoverview"
+                layout='list' />
+        </ion-list>
+    </div>
+    <ion-item *ngIf="block.contents?.footer" class="ion-text-wrap core-block-footer">
+        <ion-label>
+            <core-format-text [text]="block.contents?.footer" contextLevel="block" [contextInstanceId]="block.instanceid"
+                [courseId]="courseId" />
+        </ion-label>
+    </ion-item>
+</core-loading>
