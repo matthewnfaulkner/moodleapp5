@@ -1,0 +1,17 @@
+
+<mat-form-field class="example-full-width">
+    <mat-label>Number</mat-label>
+    <input #input
+            type="text"
+            placeholder="Begin typing name"
+            matInput
+            [formControl]="control"
+            [matAutocomplete]="auto"
+            (input)="filter()"
+            (focus)="filter()">
+    <mat-autocomplete requireSelection #auto="matAutocomplete" [displayWith]="displayFn.bind(this)">
+        @for (option of filteredOptions; track option) {
+        <mat-option [value]="option.id">{{option.fullname}}</mat-option>
+        }
+    </mat-autocomplete>
+</mat-form-field>

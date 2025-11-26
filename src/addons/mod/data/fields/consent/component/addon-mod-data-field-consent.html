@@ -1,0 +1,53 @@
+@if (inputMode && form) {
+    <span [formGroup]="form">
+    @if (isSubmitter) {
+            @if (searchMode) {
+                <ion-input type="text" [placeholder]="field.name" [formControlName]="'f_'+field.id" />
+            }
+            @if (editMode) {
+                <span [core-mark-required]="field.required" class="core-mark-required"></span>
+            }
+            <ion-input type="hidden"  [value]="isSubmitter" [formControlName]="'f_'+field.id" />
+            <ion-input type="hidden"  [value]="submitterId" [formControlName]="'f_'+field.id+'_0'" />
+            @if (error && editMode) {
+                <core-input-errors [control]="form.controls['f_'+field.id]" [errorText]="error" />
+            }
+            <ion-checkbox
+                labelPlacement="start" [formControlName]="'f_'+field.id+'_1'">{{field.param2}}</ion-checkbox>
+
+
+        <addon-mod-data-field-consent-signaturepad [formControlName]="'f_'+field.id+'_2'" />
+    }@else {
+        @if (editMode) {
+                <span [core-mark-required]="field.required" class="core-mark-required"></span>
+            }
+        @if (error && editMode) {
+            <core-input-errors [control]="form.controls['f_'+field.id]" [errorText]="error" />
+        }
+        <ion-input type="hidden" [value]="isSubmitter" [formControlName]="'f_'+field.id" />
+        <addon-mod-data-field-consent-autocomplete
+                [courseid]="database?.course"
+                [groupid]="groupid"
+                [formControlName]="'f_'+field.id+'_0'"
+                />
+    }
+    </span>
+}
+
+@if (searchMode && form) {
+    <ng-container [formGroup]="form">
+        <ion-input type="text" [formControlName]="'f_'+field.id" [placeholder]="field.name" />
+    </ng-container>
+}
+
+@if (displayMode) {
+    @if (value && user) {
+        <core-user-avatar [linkProfile]="true" [user]="user"/>
+        <ion-label>
+            <h4 class="item-heading">{{ user.fullname }}</h4>
+            <p>{{ user.country }}</p>
+        </ion-label>
+
+    }
+
+}

@@ -1,0 +1,6 @@
+{
+    "fieldtypelabel": "Consent",
+    "noconsentuserselected": "Please select a user",
+    "noconsentgiven" : "Consent not checked",
+    "nosignature" : "Please enter your signature."
+}
