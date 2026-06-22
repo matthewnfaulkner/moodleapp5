@@ -1,0 +1,39 @@
+@use "theme/globals" as *;
+
+:host .core-rating-vote-widget {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0;
+    padding: 4px 8px;
+
+    .core-rating-vote-btn {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 32px;
+        height: 32px;
+        padding: 0;
+        border: 0;
+        border-radius: 50%;
+        background: transparent;
+        color: var(--core-text-color-light, var(--ion-color-medium));
+        font-size: 20px;
+
+        &:disabled {
+            opacity: 0.5;
+        }
+
+        &:not(:disabled):hover {
+            background-color: var(--ion-color-light);
+        }
+
+        &.core-rating-vote-up.core-rating-vote-active {
+            color: var(--core-rating-upvote-color, #ff4500);
+        }
+
+        &.core-rating-vote-down.core-rating-vote-active {
+            color: var(--core-rating-downvote-color, #7193ff);
+        }
+    }
+}

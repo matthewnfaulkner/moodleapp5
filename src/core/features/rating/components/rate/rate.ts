@@ -36,6 +36,7 @@ import { CoreSharedModule } from '@/core/shared.module';
 @Component({
     selector: 'core-rating-rate',
     templateUrl: 'core-rating-rate.html',
+    styleUrl: 'rate.scss',
     imports: [
         CoreSharedModule,
     ],
@@ -58,6 +59,12 @@ export class CoreRatingRateComponent implements OnChanges, OnDestroy {
     scale?: CoreRatingScale;
     rating?: number;
     disabled = false;
+
+    // A 2-item non-numeric scale whose labels parse to numbers (e.g. "-1"/"1") is rendered as an upvote/downvote widget.
+    isVoteScale = false;
+    upScaleValue?: number;
+    downScaleValue?: number;
+    canShowRating = false;
 
     protected updateSiteObserver: CoreEventObserver;
 
@@ -83,9 +90,12 @@ export class CoreRatingRateComponent implements OnChanges, OnDestroy {
 
         if (!this.item || !this.scale) {
             this.item = undefined;
+            this.canShowRating = false;
 
             return;
         }
+
+        this.canShowRating = (this.item.canrate || this.item.rating !== null) && !this.disabled;
 
         // Set numeric scale items.
         if (!this.scale.items) {
@@ -104,6 +114,8 @@ export class CoreRatingRateComponent implements OnChanges, OnDestroy {
                 value: CoreRatingProvider.UNSET_RATING,
             });
         }
+
+        this.detectVoteScale();
 
         this.onLoading.emit(true);
 
@@ -125,6 +137,51 @@ export class CoreRatingRateComponent implements OnChanges, OnDestroy {
         } finally {
             this.onLoading.emit(false);
         }
+    }
+
+    /**
+     * Detect whether the scale is a 2-item scale with numeric labels (e.g. "-1"/"1"), to be rendered as
+     * an upvote/downvote widget instead of a dropdown select.
+     */
+    protected detectVoteScale(): void {
+        this.isVoteScale = false;
+        this.upScaleValue = undefined;
+        this.downScaleValue = undefined;
+
+        if (!this.scale || this.scale.isnumeric) {
+            return;
+        }
+
+        const realItems = (this.scale.items || []).filter((item) => item.value !== CoreRatingProvider.UNSET_RATING);
+        if (realItems.length !== 2) {
+            return;
+        }
+
+        const parsed = realItems
+            .map((item) => ({ value: item.value, label: parseFloat(item.name) }))
+            .sort((a, b) => a.label - b.label);
+
+        if (parsed.some((item) => isNaN(item.label))) {
+            return;
+        }
+
+        this.isVoteScale = true;
+        this.downScaleValue = parsed[0].value;
+        this.upScaleValue = parsed[1].value;
+    }
+
+    /**
+     * Toggle an upvote or downvote. Voting the same option again removes the rating.
+     *
+     * @param value Scale value to submit (the up or down scale value).
+     */
+    vote(value?: number): void {
+        if (value === undefined || !this.item?.canrate) {
+            return;
+        }
+
+        this.rating = this.rating === value ? CoreRatingProvider.UNSET_RATING : value;
+        this.userRatingChanged();
     }
 
     /**

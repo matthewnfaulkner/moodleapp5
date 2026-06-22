@@ -31,6 +31,7 @@ import { CoreSharedModule } from '@/core/shared.module';
 @Component({
     selector: 'core-rating-aggregate',
     templateUrl: 'core-rating-aggregate.html',
+    styleUrl: 'aggregate.scss',
     imports: [
         CoreSharedModule,
     ],
@@ -49,6 +50,10 @@ export class CoreRatingAggregateComponent implements OnChanges, OnDestroy {
     showCount = false;
     disabled = false;
     labelKey = '';
+
+    // A 2-item non-numeric scale whose labels parse to numbers (e.g. "-1"/"1") is shown as a net vote score.
+    isVoteScale = false;
+    voteScore = 0;
 
     protected aggregateObserver?: CoreEventObserver;
     protected updateSiteObserver: CoreEventObserver;
@@ -74,29 +79,36 @@ export class CoreRatingAggregateComponent implements OnChanges, OnDestroy {
             return;
         }
 
-        switch (this.aggregateMethod) {
-            case CoreRatingProvider.AGGREGATE_AVERAGE:
-                this.labelKey = 'core.rating.aggregateavg';
-                break;
-            case CoreRatingProvider.AGGREGATE_COUNT:
-                this.labelKey = 'core.rating.aggregatecount';
-                break;
-            case CoreRatingProvider.AGGREGATE_MAXIMUM:
-                this.labelKey = 'core.rating.aggregatemax';
-                break;
-            case CoreRatingProvider.AGGREGATE_MINIMUM:
-                this.labelKey = 'core.rating.aggregatemin';
-                break;
-            case CoreRatingProvider.AGGREGATE_SUM:
-                this.labelKey = 'core.rating.aggregatesum';
-                break;
-            default:
-                this.labelKey = '';
+        const scale = (this.ratingInfo.scales || []).find((candidate) => candidate.id === this.scaleId);
+        this.isVoteScale = !!CoreRating.getVoteScaleLabels(scale, this.aggregateMethod);
 
-                return;
+        if (!this.isVoteScale) {
+            switch (this.aggregateMethod) {
+                case CoreRatingProvider.AGGREGATE_AVERAGE:
+                    this.labelKey = 'core.rating.aggregateavg';
+                    break;
+                case CoreRatingProvider.AGGREGATE_COUNT:
+                    this.labelKey = 'core.rating.aggregatecount';
+                    break;
+                case CoreRatingProvider.AGGREGATE_MAXIMUM:
+                    this.labelKey = 'core.rating.aggregatemax';
+                    break;
+                case CoreRatingProvider.AGGREGATE_MINIMUM:
+                    this.labelKey = 'core.rating.aggregatemin';
+                    break;
+                case CoreRatingProvider.AGGREGATE_SUM:
+                    this.labelKey = 'core.rating.aggregatesum';
+                    break;
+                default:
+                    this.labelKey = '';
+
+                    return;
+            }
+
+            this.showCount = (this.aggregateMethod != CoreRatingProvider.AGGREGATE_COUNT);
+        } else {
+            this.voteScore = CoreRating.calculateNetVoteScore(this.item, scale, this.aggregateMethod) ?? 0;
         }
-
-        this.showCount = (this.aggregateMethod != CoreRatingProvider.AGGREGATE_COUNT);
 
         // Update aggrgate when the user adds or edits a rating.
         this.aggregateObserver =
@@ -108,7 +120,12 @@ export class CoreRatingAggregateComponent implements OnChanges, OnDestroy {
                     data.ratingArea === this.ratingInfo.ratingarea &&
                     data.itemId === this.itemId) {
                     this.item.aggregatestr = data.aggregate;
+                    this.item.aggregate = data.aggregate !== undefined ? parseFloat(data.aggregate) : undefined;
                     this.item.count = data.count;
+
+                    if (this.isVoteScale) {
+                        this.voteScore = CoreRating.calculateNetVoteScore(this.item, scale, this.aggregateMethod) ?? 0;
+                    }
                 }
             });
     }

@@ -16,7 +16,7 @@ import { Injectable } from '@angular/core';
 import { CoreSite } from '@classes/sites/site';
 import { CoreCourseCommonModWSOptions } from '@features/course/services/course';
 import { CoreCourseLogHelper } from '@features/course/services/log-helper';
-import { CoreRatingInfo } from '@features/rating/services/rating';
+import { CoreRating, CoreRatingInfo } from '@features/rating/services/rating';
 import { CoreTagItem } from '@features/tag/services/tag';
 import { CoreUser } from '@features/user/services/user';
 import { CoreNetwork } from '@services/network';
@@ -662,6 +662,45 @@ export class AddonModForumProvider {
             } else {
                 return timeCreatedB - timeCreatedA;
             }
+        });
+    }
+
+    /**
+     * Sort forum discussion posts by their net vote score (descending), falling back to most-recent-first
+     * for ties or when a post has no computable score (e.g. the forum isn't using the up/down vote scale).
+     *
+     * @param posts Discussion posts to be sorted in place.
+     * @param ratingInfo Rating info for the discussion, as returned alongside the posts.
+     * @param scaleId Scale id used by the forum's ratings (forum.scale).
+     * @param aggregateMethod Aggregate method used by the forum's ratings (forum.assessed).
+     */
+    sortDiscussionPostsByScore(
+        posts: AddonModForumPost[],
+        ratingInfo: CoreRatingInfo,
+        scaleId: number,
+        aggregateMethod: number,
+    ): void {
+        const scale = (ratingInfo.scales || []).find((candidate) => candidate.id === scaleId);
+        const ratings = ratingInfo.ratings || [];
+
+        const scoreFor = (post: AddonModForumPost): number =>
+            CoreRating.calculateNetVoteScore(
+                ratings.find((rating) => rating.itemid === post.id),
+                scale,
+                aggregateMethod,
+            ) ?? 0;
+
+        posts.sort((a, b) => {
+            const timeCreatedA = Number(a.timecreated) || 0;
+            const timeCreatedB = Number(b.timecreated) || 0;
+            if (timeCreatedA == 0 || timeCreatedB == 0) {
+                // Leave unsent posts at the end.
+                return timeCreatedB - timeCreatedA;
+            }
+
+            const scoreDiff = scoreFor(b) - scoreFor(a);
+
+            return scoreDiff !== 0 ? scoreDiff : timeCreatedB - timeCreatedA;
         });
     }
 

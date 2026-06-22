@@ -74,6 +74,16 @@
                                 </ion-button>
                             }
                         }
+                        @if (forum && ratingInfo) {
+                            <core-rating-rate class="addon-mod-forum-post-rating" [ratingInfo]="ratingInfo" contextLevel="module"
+                                [instanceId]="componentId" [itemId]="post.id" [itemSetId]="discussionId" [courseId]="courseId"
+                                [aggregateMethod]="forum.assessed" [scaleId]="forum.scale" [userId]="post.author.id"
+                                (onUpdate)="ratingUpdated()">
+                                <core-rating-aggregate [ratingInfo]="ratingInfo" contextLevel="module" [instanceId]="componentId"
+                                    [itemId]="post.id" [courseId]="courseId" [aggregateMethod]="forum.assessed"
+                                    [scaleId]="forum.scale" />
+                            </core-rating-rate>
+                        }
                     </div>
                 </ion-label>
             </ion-item>
@@ -106,14 +116,6 @@
                     </ion-label>
                 </ion-item>
             }
-            @if (forum && ratingInfo) {
-                <core-rating-rate [ratingInfo]="ratingInfo" contextLevel="module" [instanceId]="componentId" [itemId]="post.id"
-                    [itemSetId]="discussionId" [courseId]="courseId" [aggregateMethod]="forum.assessed" [scaleId]="forum.scale"
-                    [userId]="post.author.id" (onUpdate)="ratingUpdated()" />
-                <core-rating-aggregate [ratingInfo]="ratingInfo" contextLevel="module" [instanceId]="componentId" [itemId]="post.id"
-                    [courseId]="courseId" [aggregateMethod]="forum.assessed" [scaleId]="forum.scale" />
-            }
-
             @if (post.id > 0 && post.capabilities.reply && !post.isprivatereply) {
                 <ion-item class="ion-no-padding ion-text-end addon-forum-reply-button">
                     <ion-label>

@@ -12,18 +12,21 @@
 
     <core-loading [hideUntil]="loaded">
 
-        <ion-card *ngIf="jumboConfig" class="card-background-page text-center limited-width" (click)="open(jumboConfig.jumbourl)">
+        <swiper-container *ngIf="jumboConfig?.slides?.length" class="sitehome-jumbo-slides limited-width" pagination="true"
+            loop="true">
+            <swiper-slide *ngFor="let slide of jumboConfig.slides">
+                <div class="sitehome-jumbo-slide" [class.sitehome-jumbo-slide-clickable]="slide.slidelink"
+                    (click)="openSlide(slide)">
+                    <core-format-text [text]="slide.slidecontent" />
+                </div>
+            </swiper-slide>
+        </swiper-container>
 
-            <ion-card-header>
-                <core-format-text [text]="jumboConfig.jumbotitle" />
-
-            </ion-card-header>
-
+        <ion-card *ngIf="jumboConfig?.jumboannouncement" class="sitehome-jumbo-announcement limited-width"
+            (click)="open(jumboConfig.announcementlink)">
             <ion-card-content>
-                <core-format-text [text]="jumboConfig.jumbodescription" />
+                <core-format-text [text]="jumboConfig.jumboannouncement" />
             </ion-card-content>
-            <video *ngIf="jumboConfig.jumbovideoflag" [src]="jumboConfig.jumbovideo"></video>
-            <img *ngIf="!jumboConfig.jumbovideoflag" alt="Silhouette of mountains" [src]="jumboConfig.jumbobannerposter" />
         </ion-card>
         <ion-list class="list-item-limited-width" *ngIf="hasMainBlocks">
             <ng-container *ngFor="let block of blocks">
@@ -53,7 +56,6 @@
         <core-course-module class="core-sitehome-news" [module]="newsForumModule" />
     }
 </ng-template>
-
 <ng-template #categories>
     <ion-card>
         <ion-item button class="ion-text-wrap" (click)="openCourseCategories()">

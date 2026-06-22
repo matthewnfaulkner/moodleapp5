@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Component, OnDestroy, OnInit, inject, ViewChildren, QueryList  } from '@angular/core';
+import { Component, CUSTOM_ELEMENTS_SCHEMA, OnDestroy, OnInit, inject, ViewChildren, QueryList  } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 
 import { CoreSite, CoreSiteConfig } from '@classes/sites/site';
@@ -36,7 +36,7 @@ import { Translate } from '@singletons';
 import { CoreSharedModule } from '@/core/shared.module';
 import { CoreCourseModuleComponent } from '../../../course/components/module/module';
 import { CoreBlockSideBlocksButtonComponent } from '../../../block/components/side-blocks-button/side-blocks-button';
-import { CoreSiteHomeJumboConfig } from '../../services/sitehome';
+import { CoreSiteHomeJumboConfig, CoreSiteHomeJumboSlide } from '../../services/sitehome';
 import { CoreBlockComponent } from '@features/block/components/block/block';
 import { CoreLoadings } from '@services/overlays/loadings';
 import { CoreBlockDelegate } from '@features/block/services/block-delegate';
@@ -54,6 +54,7 @@ import { CoreBlockDelegate } from '@features/block/services/block-delegate';
         CoreBlockSideBlocksButtonComponent,
         CoreBlockComponent,
     ],
+    schemas: [CUSTOM_ELEMENTS_SCHEMA],
 })
 export default class CoreSiteHomeIndexPage implements OnInit, OnDestroy {
 
@@ -328,6 +329,19 @@ export default class CoreSiteHomeIndexPage implements OnInit, OnDestroy {
         } finally {
             modal.dismiss();
         }
+    }
+
+    /**
+     * Open a jumbo slide's link, if it has one.
+     *
+     * @param slide Slide that was clicked.
+     */
+    openSlide(slide: CoreSiteHomeJumboSlide): void {
+        if (!slide.slidelink) {
+            return;
+        }
+
+        this.open(slide.slidelink);
     }
 
     /**

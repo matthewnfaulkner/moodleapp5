@@ -62,6 +62,26 @@
             flex-grow: 1;
         }
 
+        .addon-mod-forum-post-rating {
+            flex-shrink: 0;
+            align-self: stretch;
+
+            ::ng-deep .core-rating-vote-widget {
+                padding: 0;
+                gap: 0;
+
+                .core-rating-vote-btn {
+                    width: 24px;
+                    height: 24px;
+                    font-size: 16px;
+                }
+            }
+
+            ::ng-deep .core-rating-vote-score {
+                font-size: 0.85rem;
+            }
+        }
+
     }
 
     ion-card-content {

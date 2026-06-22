@@ -1,5 +1,62 @@
 @use "theme/helpers/helpers" as *;
 
+.sitehome-jumbo-slides {
+    display: block;
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    margin-bottom: 12px;
+    overflow: hidden;
+
+    swiper-slide {
+        display: block;
+        width: 100%;
+        height: 100%;
+    }
+
+    .sitehome-jumbo-slide {
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+
+        &.sitehome-jumbo-slide-clickable {
+            cursor: pointer;
+        }
+
+        core-format-text {
+            display: block;
+            width: 100%;
+            height: 100%;
+
+            // core-format-text sets its content via innerHTML, so those nodes never get Angular's
+            // view-encapsulation attribute - scoped (non ::ng-deep) rules can never match them at all,
+            // regardless of specificity or !important.
+            ::ng-deep .card {
+                height: 100% !important;
+
+                // .card is flex-direction: column, which only stretches children on the cross axis
+                // (width) - height still needs to be set explicitly down the chain.
+                .core-adapted-img-container {
+                    display: block !important;
+                    width: 100% !important;
+                    height: 100% !important;
+                }
+
+                // Overrides the inline width (e.g. style="width: 900px") that Moodle's media-adapt-width
+                // handling copies from the original <img width> attribute.
+                img {
+                    width: 100% !important;
+                    height: 100% !important;
+                    object-fit: cover;
+                }
+            }
+        }
+    }
+}
+
+.sitehome-jumbo-announcement {
+    cursor: pointer;
+}
+
 ion-item ion-icon {
     display: inline-block;
     border-radius: var(--mdl-shape-borderRadius-xs);

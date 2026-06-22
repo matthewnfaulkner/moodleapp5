@@ -61,8 +61,8 @@
     </feature>
     <platform name="android">
         <preference name="AndroidWindowSplashScreenAnimatedIcon" value="resources/splash.png" />
-        <preference name="AndroidWindowSplashScreenBackground" value="#336667" />
-        <preference name="AndroidWindowSplashScreenIconBackgroundColor" value="#336667" />
+        <preference name="AndroidWindowSplashScreenBackground" value="#F1DF1D" />
+        <preference name="AndroidWindowSplashScreenIconBackgroundColor" value="#F1DF1D" />
         <resource-file src="google-services.json" target="app/google-services.json" />
         <resource-file src="resources/android/icon/drawable-mdpi-smallicon.png" target="app/src/main/res/mipmap-mdpi/smallicon.png" />
         <resource-file src="resources/android/icon/drawable-hdpi-smallicon.png" target="app/src/main/res/mipmap-hdpi/smallicon.png" />

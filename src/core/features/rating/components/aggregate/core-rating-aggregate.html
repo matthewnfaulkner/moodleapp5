@@ -1,11 +1,19 @@
-@if (item && item.canviewaggregate && labelKey && !disabled) {
-    <ion-item class="ion-text-wrap" [detail]="ratingInfo.canviewall && item.count" (click)="openRatings()"
-        [button]="ratingInfo.canviewall && item.count">
-        <ion-label>
-            {{ labelKey | translate }}{{ 'core.labelsep' | translate }} {{ item.aggregatestr || '-' }}
-            @if (showCount && item.count && item.count! > 0) {
-                <span>({{ item.count! }})</span>
-                }
-        </ion-label>
-    </ion-item>
+@if (item && item.canviewaggregate && !disabled) {
+    @if (isVoteScale) {
+        <span class="core-rating-vote-score" [class.core-rating-vote-positive]="voteScore > 0"
+            [class.core-rating-vote-negative]="voteScore < 0"
+            [class.core-rating-vote-clickable]="ratingInfo.canviewall && item.count" (click)="openRatings()">
+            {{ voteScore > 0 ? '+' : '' }}{{ voteScore }}
+        </span>
+    } @else if (labelKey) {
+        <ion-item class="ion-text-wrap" [detail]="ratingInfo.canviewall && item.count" (click)="openRatings()"
+            [button]="ratingInfo.canviewall && item.count">
+            <ion-label>
+                {{ labelKey | translate }}{{ 'core.labelsep' | translate }} {{ item.aggregatestr || '-' }}
+                @if (showCount && item.count && item.count! > 0) {
+                    <span>({{ item.count! }})</span>
+                    }
+            </ion-label>
+        </ion-item>
     }
+}

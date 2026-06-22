@@ -4,7 +4,9 @@
     "aggregatemax": "Maximum rating",
     "aggregatemin": "Minimum rating",
     "aggregatesum": "Sum of ratings",
+    "downvote": "Downvote",
     "noratings": "No ratings submitted",
     "rating": "Rating",
-    "ratings": "Ratings"
+    "ratings": "Ratings",
+    "upvote": "Upvote"
 }

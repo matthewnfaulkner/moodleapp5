@@ -28,7 +28,6 @@ import { asyncObservable } from '@/core/utils/rxjs';
 import { firstValueFrom } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { CoreCacheUpdateFrequency } from '@/core/constants';
-import { Url } from 'url';
 
 import { AddonBlockFrontpageConfig } from '@addons/block/frontpage/components/frontpage/frontpage';
 
@@ -481,20 +480,18 @@ type CoreSiteHomeJumboConfigWSResponse = {
     warnings?: CoreStatusWithWarningsWSResponse[];
 };
 
+export type CoreSiteHomeJumboSlide = {
+    index: number;
+    slidecontent: string; // Raw HTML content of the slide.
+    slidelink?: string; // URL the slide links to.
+};
+
 export type CoreSiteHomeJumboConfig = {
-    jumbotitle: string;
-    jumbodescription: string;
-    jumbovideoflag: boolean;
-    jumbotag: string;
-    jumbobanner: Url;
-    jumbobannerposter: Url;
-    jumbovideo: Url;
-    jumbobannerlogo: Url;
-    jumbourl: string;
-    jumbostartdate: number;
-    jumboannouncement: string;
-    announcementlink: Url;
-    announcementid: number;
+    slides: CoreSiteHomeJumboSlide[];
+    jumbostartdate?: number;
+    jumboannouncement?: string; // First announcement text.
+    announcementlink: string; // URL of the announcements forum.
+    announcementid?: number;
 };
 
 /**

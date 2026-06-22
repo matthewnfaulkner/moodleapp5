@@ -296,6 +296,74 @@ export class CoreRatingProvider {
     }
 
     /**
+     * Check whether a scale is a 2-item scale with numeric labels (e.g. "-1"/"1"), used to render an
+     * upvote/downvote widget instead of a dropdown select. Only applies to SUM aggregation, since the net
+     * vote score formula relies on the raw sum of scale keys.
+     *
+     * @param scale Scale to check.
+     * @param aggregateMethod Aggregate method used for the rating.
+     * @returns The down/up label values (e.g. -1/1), sorted ascending, or undefined if not a vote scale.
+     */
+    getVoteScaleLabels(scale: CoreRatingScale | undefined, aggregateMethod: number): [number, number] | undefined {
+        if (!scale || scale.isnumeric || aggregateMethod !== CoreRatingProvider.AGGREGATE_SUM) {
+            return;
+        }
+
+        const realItems = (scale.items || []).filter((item) => item.value !== CoreRatingProvider.UNSET_RATING);
+        if (realItems.length !== 2) {
+            return;
+        }
+
+        const parsed = realItems
+            .map((item) => parseFloat(item.name))
+            .sort((a, b) => a - b) as [number, number];
+
+        if (parsed.some((label) => isNaN(label))) {
+            return;
+        }
+
+        return parsed;
+    }
+
+    /**
+     * Compute the net vote score (upvotes - downvotes) for a vote-scale rating item, from the raw SUM
+     * aggregate of scale keys and the total rating count.
+     *
+     * Given a 2-item scale with keys 1 and 2 mapping to label values v0 (down) and v1 (up):
+     *     aggregate = downCount * 1 + upCount * 2
+     *     count = downCount + upCount
+     * Solving for downCount/upCount and substituting into (downCount * v0 + upCount * v1) gives:
+     *     net = aggregate * (v1 - v0) + count * (2 * v0 - v1)
+     *
+     * @param item Rating item to compute the score for.
+     * @param scale Scale used by the rating item.
+     * @param aggregateMethod Aggregate method used for the rating.
+     * @returns Net vote score, or undefined if this isn't a vote scale.
+     */
+    calculateNetVoteScore(
+        item: CoreRatingInfoItem | undefined,
+        scale: CoreRatingScale | undefined,
+        aggregateMethod: number,
+    ): number | undefined {
+        const labels = this.getVoteScaleLabels(scale, aggregateMethod);
+        if (!labels) {
+            return;
+        }
+
+        const [downLabel, upLabel] = labels;
+        const count = item?.count;
+        const aggregate = item?.aggregate !== undefined ? parseFloat(String(item.aggregate)) : undefined;
+
+        if (aggregate === undefined || isNaN(aggregate) || !count) {
+            return 0;
+        }
+
+        const net = aggregate * (upLabel - downLabel) + count * (2 * downLabel - upLabel);
+
+        return Math.round(net);
+    }
+
+    /**
      * Check if rating is disabled in a certain site.
      *
      * @param site Site. If not defined, use current site.

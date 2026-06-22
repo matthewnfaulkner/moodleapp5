@@ -18,7 +18,7 @@ import { ActivatedRoute, ActivatedRouteSnapshot } from '@angular/router';
 import { CoreRoutedItemsManagerSourcesTracker } from '@classes/items-management/routed-items-manager-sources-tracker';
 import { CoreSplitViewComponent } from '@components/split-view/split-view';
 import { CoreFileUploader } from '@features/fileuploader/services/fileuploader';
-import { CoreRatingInfo, CoreRatingProvider } from '@features/rating/services/rating';
+import { CoreRating, CoreRatingInfo, CoreRatingProvider } from '@features/rating/services/rating';
 import { CoreRatingOffline } from '@features/rating/services/rating-offline';
 import { CoreRatingSyncProvider } from '@features/rating/services/rating-sync';
 import { CanLeave } from '@guards/can-leave';
@@ -66,7 +66,7 @@ import { AddonModForumPostComponent } from '../../components/post/post';
 import { CoreSharedModule } from '@/core/shared.module';
 import { CoreUserPreferences } from '@features/user/services/user-preferences';
 
-type SortType = 'flat-newest' | 'flat-oldest' | 'nested';
+type SortType = 'flat-newest' | 'flat-oldest' | 'nested' | 'nested-score';
 
 type Post = AddonModForumPost & { children?: Post[] };
 
@@ -104,6 +104,7 @@ export default class AddonModForumDiscussionPage implements OnInit, AfterViewIni
     readonly isOnline = CoreNetwork.onlineSignal;
     postHasOffline!: boolean;
     sort: SortType = 'nested';
+    canSortByScore = false;
     trackPosts!: boolean;
     formData: AddonModForumSharedPostFormData = {
         replyingTo: 0,
@@ -465,7 +466,7 @@ export default class AddonModForumDiscussionPage implements OnInit, AfterViewIni
             this.startingPost = AddonModForum.extractStartingPost(posts);
 
             // If sort type is nested, normal sorting is disabled and nested posts will be displayed.
-            if (this.sort == 'nested') {
+            if (this.sort == 'nested' || this.sort == 'nested-score') {
                 // Sort first by creation date to make format tree work.
                 AddonModForum.sortDiscussionPosts(posts, 'ASC');
 
@@ -490,6 +491,14 @@ export default class AddonModForumDiscussionPage implements OnInit, AfterViewIni
                 this.courseId = forum.course;
                 this.forum = forum;
                 this.availabilityMessage = AddonModForumHelper.getAvailabilityMessage(forum);
+
+                // Score sorting needs the forum's rating settings, only available after fetching the forum.
+                const scale = this.ratingInfo?.scales?.find((candidate) => candidate.id === forum.scale);
+                this.canSortByScore = !!CoreRating.getVoteScaleLabels(scale, forum.assessed);
+
+                if (this.sort === 'nested-score' && this.canSortByScore && this.ratingInfo) {
+                    this.sortNestedPostsByScore(posts, this.ratingInfo, forum.scale, forum.assessed);
+                }
 
                 const promises: Promise<void>[] = [];
 
@@ -576,6 +585,30 @@ export default class AddonModForumDiscussionPage implements OnInit, AfterViewIni
                 this.logDiscussionView(forceMarkAsRead);
             }
         }
+    }
+
+    /**
+     * Sort a nested posts tree by net vote score, recursively at every level (siblings under the same
+     * parent are reordered, but the parent/child structure itself is untouched).
+     *
+     * @param posts Top-level posts of the tree to sort in place.
+     * @param ratingInfo Rating info for the discussion, as returned alongside the posts.
+     * @param scaleId Scale id used by the forum's ratings (forum.scale).
+     * @param aggregateMethod Aggregate method used by the forum's ratings (forum.assessed).
+     */
+    protected sortNestedPostsByScore(
+        posts: Post[],
+        ratingInfo: CoreRatingInfo,
+        scaleId: number,
+        aggregateMethod: number,
+    ): void {
+        AddonModForum.sortDiscussionPostsByScore(posts, ratingInfo, scaleId, aggregateMethod);
+
+        posts.forEach((post) => {
+            if (post.children?.length) {
+                this.sortNestedPostsByScore(post.children, ratingInfo, scaleId, aggregateMethod);
+            }
+        });
     }
 
     /**

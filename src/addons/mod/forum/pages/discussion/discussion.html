@@ -31,6 +31,8 @@
             [content]="'addon.mod_forum.modeflatnewestfirst' | translate" iconAction="fas-arrow-up" (action)="changeSort('flat-newest')" />
         <core-context-menu-item [hidden]="sort === 'nested'" [priority]="400" [content]="'addon.mod_forum.modenested' | translate"
             iconAction="fas-right-left" (action)="changeSort('nested')" />
+        <core-context-menu-item [hidden]="!canSortByScore || sort === 'nested-score'" [priority]="475"
+            [content]="'addon.mod_forum.modenestedscore' | translate" iconAction="fas-caret-up" (action)="changeSort('nested-score')" />
         <core-context-menu-item [hidden]="!discussion || !discussion.canlock || discussion.locked" [priority]="300"
             [content]="'addon.mod_forum.lockdiscussion' | translate" iconAction="fas-lock" (action)="setLockState(true)" />
         <core-context-menu-item [hidden]="!discussion || !discussion.canlock || !discussion.locked" [priority]="300"
@@ -103,7 +105,7 @@
             </div>
         }
 
-        @if (sort !== 'nested' && posts.length) {
+        @if (sort !== 'nested' && sort !== 'nested-score' && posts.length) {
             <ion-card>
                 <ng-container *ngFor="let post of posts; first as first">
                     @if (!first) {
@@ -117,7 +119,7 @@
             </ion-card>
         }
 
-        @if (sort === 'nested' && posts.length) {
+        @if ((sort === 'nested' || sort === 'nested-score') && posts.length) {
             <ng-container *ngFor="let post of posts">
                 <ng-container *ngTemplateOutlet="nestedPosts; context: {post: post}" />
             </ng-container>
